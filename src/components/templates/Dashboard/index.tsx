@@ -4,7 +4,7 @@ import { useModal } from "@/hooks/useModal"
 import React, { useEffect } from "react"
 // import HalfModal from "../HalfModal"
 
-export const HomeTemplate: React.FC = () => {
+export const DashboardTemplate: React.FC = () => {
   const { isOpen, handleOpen } =useModal()
 
   useEffect(() => {
