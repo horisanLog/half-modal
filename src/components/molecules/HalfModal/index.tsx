@@ -28,9 +28,7 @@ const StyledModalHeader = styled.div`
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  box-shadow: 0 1px 0 rgba(46, 59, 66, calc(1 * 0.125));
-  box-shadow: 0 1px 0
-    rgba(46, 59, 66, calc(var(--rsbs-content-opacity, 1) * 0.125));
+  box-shadow: 0 1px 0 0;
   z-index: 103;
   padding-top: calc(20px + env(safe-area-inset-top));
   padding-bottom: 8px;
