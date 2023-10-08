@@ -1,3 +1,5 @@
+import { DashboardTemplate } from "@/components/templates/Dashboard";
+
 export default function Page() {
-  return <DashBoardTemplate>Click me</DashBoardTemplate>
+  return <DashboardTemplate />
 }
