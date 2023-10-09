@@ -5,7 +5,7 @@ import React, { useEffect } from "react"
 // import HalfModal from "../HalfModal"
 
 export const DashboardTemplate: React.FC = () => {
-  const { isOpen, handleOpen } =useModal()
+  const { isOpen, handleOpen, handleClose } =useModal()
 
   useEffect(() => {
     if (isOpen) {
@@ -27,7 +27,7 @@ export const DashboardTemplate: React.FC = () => {
       <div>
         <button onClick={handleOpen}>モーダルを開く</button>
       </div>
-      <HalfModal isOpen={isOpen} />
+      <HalfModal isOpen={isOpen} handleClose={handleClose} />
     </>
   )
 }

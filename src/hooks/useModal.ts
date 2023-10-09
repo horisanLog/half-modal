@@ -9,7 +9,7 @@ export const useModal = () => {
   }
 
   const handleClose = () => {
-    setIsOpen(true)
+    setIsOpen(false)
   }
 
   return { handleOpen, handleClose, isOpen }
