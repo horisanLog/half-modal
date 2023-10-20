@@ -131,7 +131,8 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     currentTouchYRef.current = e.touches[0].clientY
     if (startTouchYRef.current === null || !modalContainerRef.current) return
-
+    modalContainerRef.current.style.overflowY = "hidden"
+    
     const dragDistance = currentTouchYRef.current - startTouchYRef.current
     if (dragDistance < 0) return // 上にスワイプできないようにする
 
@@ -140,6 +141,7 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
 
   const handleTouchEnd = useCallback(() => {
     if (!modalContainerRef.current || startTouchYRef.current === null) return
+    modalContainerRef.current.style.overflowY = "auto"
     const dragDistance =
       (currentTouchYRef.current || 0) - startTouchYRef.current
 
@@ -161,15 +163,13 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
         <>
           <Overlay />
           <StyledModal>
-            <StyledModalContainer ref={modalContainerRef}>
-              <StyledModalHeader
-                ref={headerRef}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                header
-              </StyledModalHeader>
+            <StyledModalContainer
+              ref={modalContainerRef}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <StyledModalHeader ref={headerRef}>header</StyledModalHeader>
               <StyledModalBody>
                 <StyledContent>
                   {Array.from({ length: 100 }, (_, i) => (
