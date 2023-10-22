@@ -75,8 +75,6 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   // ヘッダーが消えるときに段々と薄くなってなくなるようにして、ヘッダーが固定で表示されるようにする
   const headerRef = useRef<HTMLDivElement | null>(null)
 
-  const touchStartPoint = useRef({ x: 0, y: 0 })
-
   useEffect(() => {
     const handleScroll = () => {
       if (headerRef.current && modalContainerRef.current) {
@@ -106,9 +104,6 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault()
     startTouchYRef.current = e.touches[0].clientY
-
-    touchStartPoint.current.x = e.touches[0].clientX
-    touchStartPoint.current.y = e.touches[0].clientY
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
