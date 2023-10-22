@@ -104,7 +104,7 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   //////////////////////////////////////////////////////////////////////////////////////
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault() 
+    e.preventDefault()
     startTouchYRef.current = e.touches[0].clientY
 
     touchStartPoint.current.x = e.touches[0].clientX
@@ -112,12 +112,12 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault() 
+    e.preventDefault()
     currentTouchYRef.current = e.touches[0].clientY
     if (startTouchYRef.current === null || !modalContainerRef.current) return
-    
+
     const dragDistance = currentTouchYRef.current - startTouchYRef.current
-    console.log(modalContainerRef.current.scrollTop)
+
     if (dragDistance < 0) return // 上にスワイプできないようにする
 
     modalContainerRef.current.style.overflowY = "hidden"
@@ -125,10 +125,11 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   }, [])
 
   const handleTouchEnd = useCallback(async (e) => {
-    e.preventDefault() 
+    e.preventDefault()
     if (!modalContainerRef.current || startTouchYRef.current === null) return
     modalContainerRef.current.style.overflowY = "auto"
-    const dragDistance = (currentTouchYRef.current || 0) - startTouchYRef.current
+    const dragDistance =
+      (currentTouchYRef.current || 0) - startTouchYRef.current
 
     const halfModalHeight = modalContainerRef.current.offsetHeight * 0.5
     if (dragDistance > halfModalHeight) {
