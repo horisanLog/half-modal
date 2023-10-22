@@ -1,5 +1,7 @@
 "use client"
 import { Overlay } from "@/components/atoms/Overlay"
+import useWindowDimensions from "@/hooks/useWindow"
+import { delay } from "@/utils/delay"
 import { useCallback, useEffect, useRef } from "react"
 import styled from "styled-components"
 
@@ -13,67 +15,41 @@ const StyledModal = styled.div`
   right: 0;
   left: 0;
   bottom: 0;
-  overscroll-behavior: none;
-  touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  z-index: 103;
+  z-index: 102;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px);
+  overflow: hidden;
 `
-
 const StyledModalHeader = styled.div`
   text-align: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
   box-shadow: 0 1px 0 0;
-  z-index: 103;
   padding-top: calc(20px + env(safe-area-inset-top));
   padding-bottom: 8px;
   flex-shrink: 0;
   box-sizing: border-box;
-
   background-color: #fff;
-
-  position: sticky;
   top: 0;
+  position: sticky;
 
   transition: opacity 0.5s, background-color 0.5s;
-  /* &.fixed {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 102; // オーバーレイより上に配置
-  } */
 `
 
 const StyledModalContainer = styled.div`
   flex-shrink: 1;
   flex-grow: 1;
-  overflow: auto;
-  background-color: #fff;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 
-  will-change: transform; // パフォーマンス最適化
+  background-color: #fff;
+  overscroll-behavior: contain;
+
+  /* will-change: transform; // パフォーマンス最適化のつもりだったが、逆にレイヤーが作成されてパフォーマンスが落ちるのでコメントアウト transitionだけ */
   transition: transform 0.1s ease-out; // よりスムーズなトランジションを実現
 `
 
 const StyledModalBody = styled.div`
   flex-shrink: 1;
   flex-grow: 1;
-  -webkit-tap-highlight-color: revert;
-  -webkit-touch-callout: revert;
-  -webkit-user-select: auto;
-  -ms-user-select: auto;
-  -moz-user-select: auto;
-  user-select: auto;
-  /* overflow-y: auto; // 縦方向のスクロールを可能にする
-  touch-action: pan-y; // 縦方向のスクロールのみを許可する */
-  -ms-scroll-chaining: none;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
 `
 const StyledContent = styled.div`
   padding: 16px;
@@ -85,7 +61,7 @@ const StyledModalFooter = styled.div`
             0.125)),
     0 2px 0 var(--rsbs-bg, #fff);
   overflow: hidden;
-  z-index: 103;
+  z-index: 102;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   background-color: #fff;
 `
@@ -94,9 +70,12 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   const modalContainerRef = useRef<HTMLDivElement | null>(null)
   const startTouchYRef = useRef<number | null>(null)
   const currentTouchYRef = useRef<number | null>(null)
+  const { width, height } = useWindowDimensions()
 
   // ヘッダーが消えるときに段々と薄くなってなくなるようにして、ヘッダーが固定で表示されるようにする
   const headerRef = useRef<HTMLDivElement | null>(null)
+
+  const touchStartPoint = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const handleScroll = () => {
@@ -125,30 +104,51 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
   //////////////////////////////////////////////////////////////////////////////////////
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault() 
     startTouchYRef.current = e.touches[0].clientY
+
+    touchStartPoint.current.x = e.touches[0].clientX
+    touchStartPoint.current.y = e.touches[0].clientY
   }, [])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault() 
     currentTouchYRef.current = e.touches[0].clientY
     if (startTouchYRef.current === null || !modalContainerRef.current) return
-    modalContainerRef.current.style.overflowY = "hidden"
     
     const dragDistance = currentTouchYRef.current - startTouchYRef.current
+    console.log(modalContainerRef.current.scrollTop)
     if (dragDistance < 0) return // 上にスワイプできないようにする
 
+    modalContainerRef.current.style.overflowY = "hidden"
     modalContainerRef.current.style.transform = `translateY(${dragDistance}px)`
   }, [])
 
-  const handleTouchEnd = useCallback(() => {
+  const handleTouchEnd = useCallback(async (e) => {
+    e.preventDefault() 
     if (!modalContainerRef.current || startTouchYRef.current === null) return
     modalContainerRef.current.style.overflowY = "auto"
-    const dragDistance =
-      (currentTouchYRef.current || 0) - startTouchYRef.current
+    const dragDistance = (currentTouchYRef.current || 0) - startTouchYRef.current
 
     const halfModalHeight = modalContainerRef.current.offsetHeight * 0.5
     if (dragDistance > halfModalHeight) {
+      // 上にちょっと上げるときのアニメーションを設定
+      modalContainerRef.current.style.transition = "transform 0.3s ease-in-out"
+      modalContainerRef.current.style.transform = `translateY(${
+        dragDistance - 50
+      }px)`
+
+      // 300ミリ秒待機
+      await delay(300)
+
+      // 上のバウンドからすぐに下に移動
+      modalContainerRef.current.style.transition = "transform 0.3s ease-in-out"
+      modalContainerRef.current.style.transform = "translateY(100%)"
+
+      // 300ミリ秒待機
+      await delay(300)
+
       handleClose()
-      modalContainerRef.current.style.transform = `translateY(100%)`
     } else {
       modalContainerRef.current.style.transform = `translateY(0)`
     }
@@ -162,14 +162,25 @@ export const HalfModal = ({ isOpen, handleClose }: Props): JSX.Element => {
       {isOpen && (
         <>
           <Overlay />
-          <StyledModal>
+          <StyledModal
+            className={isOpen ? "entered" : "exited"}
+            style={{ height: `calc(${height}px - 60px)`, width: `${width}px` }}
+          >
             <StyledModalContainer
+              style={{
+                height: `calc(${height}px - 60px)`,
+                width: `${width}px`,
+              }}
               ref={modalContainerRef}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
             >
-              <StyledModalHeader ref={headerRef}>header</StyledModalHeader>
+              <StyledModalHeader
+                ref={headerRef}
+                onTouchStartCapture={handleTouchStart}
+                onTouchMoveCapture={handleTouchMove}
+                onTouchEndCapture={handleTouchEnd}
+              >
+                header
+              </StyledModalHeader>
               <StyledModalBody>
                 <StyledContent>
                   {Array.from({ length: 100 }, (_, i) => (

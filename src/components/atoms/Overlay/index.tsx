@@ -13,6 +13,6 @@ const StyledOverlay = styled.div`
 
 export const Overlay = (): JSX.Element => {
   return (
-      <StyledOverlay />
+    <StyledOverlay />
   )
 }
